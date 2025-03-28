@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { GlobalWorkerOptions } from 'pdfjs-dist/legacy/build/pdf.mjs';
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
+import { GlobalWorkerOptions } from 'pdfjs-dist/build/pdf';
+import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 import Carousel from 'react-multi-carousel';
+import 'react-multi-carousel/lib/styles.css';
 
-GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/legacy/build/pdf.worker.min.mjs', import.meta.url).toString();
+GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
 
 const PdfQuestionWidget = () => {
   const [file, setFile] = useState(null);
@@ -13,6 +14,7 @@ const PdfQuestionWidget = () => {
   const [error, setError] = useState(null);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [score, setScore] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const carouselResponsive = {
     desktop: {
@@ -31,6 +33,38 @@ const PdfQuestionWidget = () => {
       slidesToSlide: 1
     }
   };
+
+  const handleDragEnter = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile && droppedFile.type === 'application/pdf') {
+      setFile(droppedFile);
+      setError(null);
+    } else {
+      setError('Please drop a valid PDF file');
+      setFile(null);
+    }
+  }, []);
 
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
@@ -118,16 +152,16 @@ const PdfQuestionWidget = () => {
     const isCorrect = selectedAnswers[index] === question.correctAnswer;
 
     return (
-      <div className="p-4 bg-white rounded-lg shadow-md">
+      <div className="p-4 bg-white rounded-lg shadow-md text-center">
         <div className="mb-4">
           <p className="text-base text-gray-700 mb-4">{question.question}</p>
           
-          <div className="space-y-2">
+          <div className="space-y-2 max-w-md mx-auto">
             {question.options.map((option, optIndex) => {
               const isSelected = selectedAnswers[index] === option;
               const isCorrectAnswer = isAnswered && option === question.correctAnswer;
               
-              let optionClasses = "p-2 rounded-lg cursor-pointer transition-colors text-sm";
+              let optionClasses = "p-2 rounded-lg cursor-pointer transition-colors text-sm text-center";
               if (isAnswered) {
                 if (isCorrectAnswer) {
                   optionClasses += " bg-green-100 text-green-800";
@@ -153,18 +187,6 @@ const PdfQuestionWidget = () => {
               );
             })}
           </div>
-
-          {/* {isAnswered && (
-            <div className="mt-3">
-              {isCorrect ? (
-                <p className="text-green-600 font-medium text-sm">Correct!</p>
-              ) : (
-                <p className="text-red-600 font-medium text-sm">
-                  Incorrect. The correct answer is: {question.correctAnswer}
-                </p>
-              )}
-            </div>
-          )} */}
         </div>
       </div>
     );
@@ -179,10 +201,10 @@ const PdfQuestionWidget = () => {
   };
 
   return (
-    <div className="p-4 max-w-xl mx-auto bg-white rounded-xl shadow-lg">
+    <div className="p-4 max-w-xl mx-auto bg-white rounded-xl shadow-lg text-center">
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-800">PDF Question Generator</h2>
+          <h2 className="text-2xl font-bold text-gray-800 text-center flex-1">PDF Question Generator</h2>
           {questions.length > 0 && (
             <button
               onClick={clearAll}
@@ -197,26 +219,47 @@ const PdfQuestionWidget = () => {
         </div>
         
         <div className="space-y-3">
-          <div className="flex flex-col items-center space-y-2">
-            <input
-              type="file"
-              accept=".pdf"
-              onChange={handleFileChange}
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-blue-50 file:text-blue-700
-                hover:file:bg-blue-100"
-            />
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+          <div 
+            className={`relative border-2 border-dashed rounded-lg p-8 transition-colors
+              ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
+              ${file ? 'border-green-500 bg-green-50' : ''}`}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            <div className="text-center">
+              <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <p className="mt-2 text-sm text-gray-600">
+                {file ? (
+                  <span className="text-green-600 font-medium">{file.name}</span>
+                ) : (
+                  <>
+                    Drag and drop your PDF file here, or{' '}
+                    <label className="text-blue-600 hover:text-blue-800 cursor-pointer">
+                      <span className="font-medium">click to browse</span>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                    </label>
+                  </>
+                )}
+              </p>
+              <p className="mt-1 text-xs text-gray-500">PDF files only</p>
+            </div>
           </div>
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
           <div className="flex justify-center">
             <button
               onClick={generateQuestions}
               disabled={loading || !file}
-              className={`px-4 py-2 rounded-lg font-semibold text-white
+              className={`px-4 py-2 rounded-lg font-semibold text-white text-center
                 ${loading || !file 
                   ? 'bg-gray-400 cursor-not-allowed' 
                   : 'bg-blue-600 hover:bg-blue-700'}`}
@@ -256,13 +299,13 @@ const PdfQuestionWidget = () => {
                   <div className="flex justify-center space-x-4">
                     <button
                       onClick={resetQuiz}
-                      className="px-4 py-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700"
+                      className="px-4 py-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 text-center"
                     >
                       Try Again
                     </button>
                     <button
                       onClick={clearAll}
-                      className="px-4 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700"
+                      className="px-4 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 text-center"
                     >
                       Clear All
                     </button>
