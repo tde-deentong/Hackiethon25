@@ -201,27 +201,27 @@ const PdfQuestionWidget = () => {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-xl text-center border border-blue-100">
-      <div className="space-y-6">
+    <div className="p-3 max-w-md mx-auto bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-lg text-center border border-blue-100">
+      <div className="space-y-3">
         <div className="flex justify-between items-center">
-          <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">PDF Question Generator</h2>
+          <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">PDF Question Generator</h2>
           {questions.length > 0 && (
             <button
               onClick={clearAll}
-              className="p-2.5 rounded-full bg-red-50 hover:bg-red-100 text-red-600 transition-all duration-300 hover:shadow-md"
+              className="p-1.5 rounded-full bg-red-50 hover:bg-red-100 text-red-600 transition-all duration-300 hover:shadow-md"
               title="Clear all"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </button>
           )}
         </div>
         
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div 
-            className={`relative border-3 border-dashed rounded-xl transition-all duration-300 ease-in-out
-              ${questions.length > 0 ? 'p-4' : 'p-10'}
+            className={`relative border-2 border-dashed rounded-lg transition-all duration-300 ease-in-out
+              ${questions.length > 0 ? 'p-3' : 'p-6'}
               ${isDragging ? 'border-blue-500 bg-blue-50 shadow-lg scale-102' : 'border-blue-200 hover:border-blue-400 hover:shadow-md'}
               ${file ? 'border-green-500 bg-green-50' : ''}`}
             onDragEnter={handleDragEnter}
@@ -230,12 +230,12 @@ const PdfQuestionWidget = () => {
             onDrop={handleDrop}
           >
             <div className="text-center">
-              <svg className={`mx-auto transition-all duration-300 text-blue-400 ${questions.length > 0 ? 'h-8 w-8' : 'h-16 w-16'}`} stroke="currentColor" fill="none" viewBox="0 0 48 48">
+              <svg className={`mx-auto transition-all duration-300 text-blue-400 ${questions.length > 0 ? 'h-6 w-6' : 'h-12 w-12'}`} stroke="currentColor" fill="none" viewBox="0 0 48 48">
                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <p className={`transition-all duration-300 ${questions.length > 0 ? 'mt-2 text-sm' : 'mt-4 text-base'} text-gray-600`}>
+              <p className={`transition-all duration-300 ${questions.length > 0 ? 'mt-1 text-xs' : 'mt-2 text-sm'} text-gray-600`}>
                 {file ? (
-                  <span className="text-green-600 font-medium text-lg">{file.name}</span>
+                  <span className="text-green-600 font-medium text-base">{file.name}</span>
                 ) : (
                   <>
                     {questions.length > 0 ? 'Drop new PDF or ' : 'Drag and drop your PDF file here, or '}
@@ -251,27 +251,27 @@ const PdfQuestionWidget = () => {
                   </>
                 )}
               </p>
-              {!questions.length > 0 && <p className="mt-2 text-sm text-gray-500">PDF files only</p>}
+              {!questions.length > 0 && <p className="mt-1 text-xs text-gray-500">PDF files only</p>}
             </div>
           </div>
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
-              <p className="text-red-700 text-sm">{error}</p>
+            <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded-md">
+              <p className="text-red-700 text-xs">{error}</p>
             </div>
           )}
 
-          <div className="flex justify-center pt-2">
+          <div className="flex justify-center">
             <button
               onClick={generateQuestions}
               disabled={loading || !file}
-              className={`px-6 py-3 rounded-lg font-semibold text-white text-center transition-all duration-300 transform hover:scale-105
+              className={`px-4 py-2 rounded-lg font-semibold text-white text-sm text-center transition-all duration-300 transform hover:scale-105
                 ${loading || !file 
                   ? 'bg-gray-400 cursor-not-allowed' 
                   : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg'}`}
             >
               {loading ? (
                 <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
@@ -282,52 +282,68 @@ const PdfQuestionWidget = () => {
           </div>
 
           {questions.length > 0 && (
-            <div className="space-y-6 mt-8">
+            <div className="space-y-3 mt-4">
+              <div className="max-w-xs mx-auto">
+                <div className="flex justify-between mb-1">
+                  <span className="text-xs font-medium text-gray-700">
+                    Progress
+                  </span>
+                  <span className="text-xs font-medium text-blue-600">
+                    {Math.round((Object.keys(selectedAnswers).length / questions.length) * 100)}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                  <div 
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 h-1.5 rounded-full transition-all duration-300"
+                    style={{ width: `${(Object.keys(selectedAnswers).length / questions.length) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
               <Carousel
                 responsive={carouselResponsive}
                 infinite={false}
-                containerClass="pb-4"
-                itemClass="px-4"
-                customButtonGroup={<div className="flex justify-center space-x-4 mt-6">
-                  <button className="p-3 rounded-full bg-white hover:bg-gray-100 transition-colors shadow-md">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                containerClass="pb-1"
+                itemClass="px-1"
+                customButtonGroup={<div className="flex justify-center space-x-2 mt-4">
+                  <button className="p-2 rounded-full bg-white hover:bg-gray-100 transition-colors shadow-md">
+                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
-                  <button className="p-3 rounded-full bg-white hover:bg-gray-100 transition-colors shadow-md">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <button className="p-2 rounded-full bg-white hover:bg-gray-100 transition-colors shadow-md">
+                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
                 </div>}
                 renderDotsOutside={true}
-                customDot={<div className="w-3 h-3 mx-1 rounded-full bg-blue-200 hover:bg-blue-400 transition-colors" />}
-                dotListClass="flex justify-center mt-6"
+                customDot={<div className="w-2 h-2 mx-0.5 rounded-full bg-blue-200 hover:bg-blue-400 transition-colors" />}
+                dotListClass="flex justify-center mt-4"
               >
                 {questions.map((q, index) => (
-                  <div key={index} className="p-6 bg-white rounded-xl shadow-lg text-center transform transition-all duration-300 hover:shadow-xl">
-                    <div className="mb-6">
-                      <p className="text-lg text-gray-800 mb-6">{q.question}</p>
+                  <div key={index} className="p-3 bg-white rounded-lg shadow-md text-center transform transition-all duration-300 hover:shadow-lg">
+                    <div className="mb-3">
+                      <p className="text-sm text-gray-800 mb-3">{q.question}</p>
                       
-                      <div className="space-y-3 max-w-md mx-auto">
+                      <div className="space-y-1.5 max-w-xs mx-auto">
                         {q.options.map((option, optIndex) => {
                           const isSelected = selectedAnswers[index] === option;
                           const isAnswered = selectedAnswers[index] !== undefined;
                           const isCorrectAnswer = isAnswered && option === q.correctAnswer;
                           
-                          let optionClasses = "p-4 rounded-lg cursor-pointer transition-all duration-300 text-base text-center transform hover:scale-102";
+                          let optionClasses = "p-2.5 rounded-lg cursor-pointer transition-all duration-300 text-sm text-center transform hover:scale-102";
                           if (isAnswered) {
                             if (isCorrectAnswer) {
-                              optionClasses += " bg-green-100 text-green-800 border-2 border-green-500";
+                              optionClasses += " bg-green-100 text-green-800 border border-green-500";
                             } else if (isSelected) {
-                              optionClasses += " bg-red-100 text-red-800 border-2 border-red-500";
+                              optionClasses += " bg-red-100 text-red-800 border border-red-500";
                             } else {
                               optionClasses += " bg-gray-50 text-gray-700";
                             }
                           } else {
                             optionClasses += isSelected 
-                              ? " bg-blue-100 text-blue-800 border-2 border-blue-500" 
-                              : " bg-gray-50 hover:bg-gray-100 text-gray-700 border-2 border-transparent hover:border-blue-300";
+                              ? " bg-blue-100 text-blue-800 border border-blue-500" 
+                              : " bg-gray-50 hover:bg-gray-100 text-gray-700 border border-transparent hover:border-blue-300";
                           }
 
                           return (
