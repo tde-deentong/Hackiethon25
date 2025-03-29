@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GlobalWorkerOptions } from 'pdfjs-dist/build/pdf';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
@@ -237,30 +237,47 @@ const PdfQuestionWidget = () => {
     );
   };
 
-  const handleSaveQuiz = () => {
+  const handleSaveQuiz = async () => {
     if (file && questions.length > 0) {
-      setPdfList(prev => [...prev, {
-        id: Date.now(),
-        name: file.name,
-        file: file,
-        date: new Date().toLocaleDateString(),
-        questions: questions,
-        score: score,
-        totalQuestions: questions.length
-      }]);
-      setCurrentPage('list');
+      try {
+        // Convert File to ArrayBuffer for storage
+        const fileData = await file.arrayBuffer();
+        
+        setPdfList(prev => [...prev, {
+          id: Date.now(),
+          name: file.name,
+          file: file,
+          fileData: fileData, // Store the file data
+          fileName: file.name,
+          date: new Date().toLocaleDateString(),
+          questions: questions,
+          score: score,
+          totalQuestions: questions.length
+        }]);
+        setCurrentPage('list');
+      } catch (error) {
+        console.error('Error saving quiz:', error);
+        setError('Failed to save quiz. Please try again.');
+      }
     }
   };
 
-  const handlePdfSelect = (pdfItem) => {
-    setFile(pdfItem.file);
-    setQuestions(pdfItem.questions);
-    setSelectedAnswers({});
-    setScore(0);
-    setError(null);
-    setExplanations({});
-    setShowExplanation(false);
-    setCurrentPage('upload');
+  const handlePdfSelect = async (pdfItem) => {
+    try {
+      // Create a new File object from the stored data
+      const file = new File([pdfItem.fileData], pdfItem.fileName, { type: 'application/pdf' });
+      setFile(file);
+      setQuestions(pdfItem.questions);
+      setSelectedAnswers({});
+      setScore(0);
+      setError(null);
+      setExplanations({});
+      setShowExplanation(false);
+      setCurrentPage('upload');
+    } catch (error) {
+      console.error('Error loading quiz:', error);
+      setError('Failed to load quiz. Please try again.');
+    }
   };
 
   const handleDeletePdf = (pdfId) => {
@@ -277,6 +294,43 @@ const PdfQuestionWidget = () => {
     setShowExplanation(false);
     setPdfList([]);
   };
+
+  // Load saved quizzes from localStorage on component mount
+  useEffect(() => {
+    const savedQuizzes = localStorage.getItem('savedQuizzes');
+    if (savedQuizzes) {
+      try {
+        const parsedQuizzes = JSON.parse(savedQuizzes);
+        // Convert the stored file data back to File objects
+        const quizzesWithFiles = parsedQuizzes.map(quiz => ({
+          ...quiz,
+          file: new File([quiz.fileData], quiz.fileName, { type: 'application/pdf' })
+        }));
+        setPdfList(quizzesWithFiles);
+      } catch (error) {
+        console.error('Error loading saved quizzes:', error);
+      }
+    }
+  }, []);
+
+  // Save quizzes to localStorage whenever pdfList changes
+  useEffect(() => {
+    if (pdfList.length > 0) {
+      try {
+        // Convert File objects to a format that can be stored in localStorage
+        const serializedQuizzes = pdfList.map(quiz => ({
+          ...quiz,
+          fileName: quiz.file.name,
+          fileData: quiz.fileData // We'll store this when saving the quiz
+        }));
+        localStorage.setItem('savedQuizzes', JSON.stringify(serializedQuizzes));
+      } catch (error) {
+        console.error('Error saving quizzes:', error);
+      }
+    } else {
+      localStorage.removeItem('savedQuizzes');
+    }
+  }, [pdfList]);
 
   return (
     <div className="p-3 max-w-md mx-auto bg-gradient-to-br from-white via-blue-50 to-purple-50 rounded-xl shadow-lg text-center border border-blue-100 max-h-[90vh] overflow-y-auto">
