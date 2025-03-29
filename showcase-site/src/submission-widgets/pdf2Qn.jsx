@@ -18,7 +18,7 @@ const PdfQuestionWidget = () => {
   const [showExplanation, setShowExplanation] = useState(false);
   const [explanations, setExplanations] = useState({});
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [currentPage, setCurrentPage] = useState('upload'); // 'upload' or 'list'
+  const [currentPage, setCurrentPage] = useState('upload'); // 'upload', 'list', or 'explanation'
   const [pdfList, setPdfList] = useState([]);
   const carouselRef = useRef(null);
 
@@ -332,6 +332,78 @@ const PdfQuestionWidget = () => {
     }
   }, [pdfList]);
 
+  const renderExplanationPage = () => {
+    const incorrectQuestions = questions.filter((q, index) => selectedAnswers[index] !== q.correctAnswer);
+
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-lg font-semibold text-gray-800">Explanation Page</h3>
+          <button
+            onClick={() => setCurrentPage('upload')}
+            className="p-2 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-all duration-300 hover:shadow-md hover:scale-105"
+            title="Back to Quiz"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+        </div>
+
+        {incorrectQuestions.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="text-6xl mb-4">🎉</div>
+            <p className="text-xl font-semibold text-green-600">Perfect Score!</p>
+            <p className="text-gray-600 mt-2">You got all questions correct!</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {incorrectQuestions.map((q, index) => {
+              const originalIndex = questions.findIndex(question => question === q);
+              return (
+                <div key={index} className="bg-white p-6 rounded-lg shadow-md">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-medium text-gray-500">Question {originalIndex + 1}</span>
+                    <span className="text-sm font-medium text-red-600">Incorrect</span>
+                  </div>
+                  
+                  <p className="text-base text-gray-800 mb-4">{q.question}</p>
+                  
+                  <div className="space-y-2 mb-4">
+                    {q.options.map((option, optIndex) => {
+                      const isSelected = selectedAnswers[originalIndex] === option;
+                      const isCorrect = option === q.correctAnswer;
+                      
+                      let optionClasses = "p-3 rounded-lg text-sm";
+                      if (isCorrect) {
+                        optionClasses += " bg-green-50 text-green-800 border border-green-200";
+                      } else if (isSelected) {
+                        optionClasses += " bg-red-50 text-red-800 border border-red-200";
+                      } else {
+                        optionClasses += " bg-gray-50 text-gray-700 border border-gray-200";
+                      }
+
+                      return (
+                        <div key={optIndex} className={optionClasses}>
+                          {option}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-blue-800 mb-2">Explanation:</h4>
+                    <p className="text-sm text-blue-700">{explanations[originalIndex]}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="p-3 max-w-md mx-auto bg-gradient-to-br from-white via-blue-50 to-purple-50 rounded-xl shadow-lg text-center border border-blue-100 max-h-[90vh] overflow-y-auto">
       <div className="space-y-3">
@@ -340,23 +412,27 @@ const PdfQuestionWidget = () => {
             <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">PDF Question Generator</h2>
+            <h2 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+              {currentPage === 'explanation' ? 'Explanation Page' : 'PDF Question Generator'}
+            </h2>
           </div>
           <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setCurrentPage(currentPage === 'upload' ? 'list' : 'upload')}
-              className="p-1.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-all duration-300 hover:shadow-md hover:scale-105"
-              title={currentPage === 'upload' ? 'View PDF List' : 'Back to Upload'}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {currentPage === 'upload' ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                )}
-              </svg>
-            </button>
-            {questions.length > 0 && (
+            {currentPage !== 'explanation' && (
+              <button
+                onClick={() => setCurrentPage(currentPage === 'upload' ? 'list' : 'upload')}
+                className="p-1.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-all duration-300 hover:shadow-md hover:scale-105"
+                title={currentPage === 'upload' ? 'View PDF List' : 'Back to Upload'}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {currentPage === 'upload' ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  )}
+                </svg>
+              </button>
+            )}
+            {questions.length > 0 && currentPage !== 'explanation' && (
               <button
                 onClick={clearAll}
                 className="p-1.5 rounded-full bg-red-50 hover:bg-red-100 text-red-600 transition-all duration-300 hover:shadow-md hover:scale-105"
@@ -370,7 +446,9 @@ const PdfQuestionWidget = () => {
           </div>
         </div>
         
-        {currentPage === 'upload' ? (
+        {currentPage === 'explanation' ? (
+          renderExplanationPage()
+        ) : currentPage === 'upload' ? (
           <div className="space-y-3">
             <div 
               className={`relative border-2 border-dashed rounded-lg transition-all duration-300 ease-in-out
@@ -553,80 +631,57 @@ const PdfQuestionWidget = () => {
                     {score < questions.length && (
                       <div className="space-y-4">
                         <button
-                          onClick={() => setShowExplanation(!showExplanation)}
+                          onClick={() => setCurrentPage('explanation')}
                           className="px-4 py-2 rounded-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105"
                         >
-                          {showExplanation ? 'Hide Explanations' : 'Show Explanations'}
+                          View Explanations
                         </button>
 
-                        {showExplanation && (
-                          <div className="space-y-4 mt-4">
-                            {questions.map((q, index) => {
-                              if (selectedAnswers[index] !== q.correctAnswer) {
-                                return (
-                                  <div key={index} className="bg-white p-4 rounded-lg shadow-md text-left">
-                                    <p className="text-sm font-medium text-gray-800 mb-2">Question {index + 1}</p>
-                                    <p className="text-sm text-gray-700 mb-2">{q.question}</p>
-                                    <div className="space-y-1 mb-3">
-                                      <p className="text-xs text-red-600">Your answer: {selectedAnswers[index]}</p>
-                                      <p className="text-xs text-green-600">Correct answer: {q.correctAnswer}</p>
-                                    </div>
-                                    <div className="bg-blue-50 p-3 rounded-md">
-                                      <p className="text-xs text-blue-800">{explanations[index]}</p>
-                                    </div>
-                                  </div>
-                                );
-                              }
-                              return null;
-                            })}
-                          </div>
-                        )}
+                        <div className="flex justify-center space-x-4">
+                          <button
+                            onClick={handleSaveQuiz}
+                            className="px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                          >
+                            Save Quiz
+                          </button>
+                          <button
+                            onClick={resetQuiz}
+                            className="px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                          >
+                            Try Again
+                          </button>
+                          <label className="px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105 cursor-pointer">
+                            Upload New PDF
+                            <input
+                              type="file"
+                              accept=".pdf"
+                              onChange={(e) => {
+                                const selectedFile = e.target.files[0];
+                                if (selectedFile && selectedFile.type === 'application/pdf') {
+                                  setFile(selectedFile);
+                                  setQuestions([]);
+                                  setSelectedAnswers({});
+                                  setScore(0);
+                                  setError(null);
+                                  setExplanations({});
+                                  setShowExplanation(false);
+                                } else {
+                                  setError('Please select a valid PDF file');
+                                  setFile(null);
+                                }
+                              }}
+                              className="hidden"
+                            />
+                          </label>
+                          <button
+                            onClick={clearAll}
+                            className="px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-red-600 to-pink-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                          >
+                            Clear All
+                          </button>
+                        </div>
                       </div>
                     )}
-
-                    <div className="flex justify-center space-x-4">
-                      <button
-                        onClick={handleSaveQuiz}
-                        className="px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-                      >
-                        Save Quiz
-                      </button>
-                      <button
-                        onClick={resetQuiz}
-                        className="px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-                      >
-                        Try Again
-                      </button>
-                      <label className="px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105 cursor-pointer">
-                        Upload New PDF
-                        <input
-                          type="file"
-                          accept=".pdf"
-                          onChange={(e) => {
-                            const selectedFile = e.target.files[0];
-                            if (selectedFile && selectedFile.type === 'application/pdf') {
-                              setFile(selectedFile);
-                              setQuestions([]);
-                              setSelectedAnswers({});
-                              setScore(0);
-                              setError(null);
-                              setExplanations({});
-                              setShowExplanation(false);
-                            } else {
-                              setError('Please select a valid PDF file');
-                              setFile(null);
-                            }
-                          }}
-                          className="hidden"
-                        />
-                      </label>
-                      <button
-                        onClick={clearAll}
-                        className="px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-red-600 to-pink-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-                      >
-                        Clear All
-                      </button>
-                    </div>
                   </div>
                 )}
               </div>
