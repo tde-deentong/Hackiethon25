@@ -199,7 +199,7 @@ const PdfQuestionWidget = () => {
     return (
       <div className="p-4 bg-white rounded-lg shadow-md text-center">
         <div className="mb-4">
-          <p className="text-base text-gray-700 mb-4">{question.question}</p>
+          <p className="text-sm text-gray-700 mb-4">{question.question}</p>
           
           <div className="space-y-2 max-w-md mx-auto">
             {question.options.map((option, optIndex) => {
@@ -360,6 +360,9 @@ const PdfQuestionWidget = () => {
           <div className="space-y-6">
             {incorrectQuestions.map((q, index) => {
               const originalIndex = questions.findIndex(question => question === q);
+              const userAnswer = selectedAnswers[originalIndex];
+              const correctAnswer = q.correctAnswer;
+
               return (
                 <div key={index} className="bg-white p-6 rounded-lg shadow-md">
                   <div className="flex items-center justify-between mb-4">
@@ -370,30 +373,17 @@ const PdfQuestionWidget = () => {
                   <p className="text-base text-gray-800 mb-4">{q.question}</p>
                   
                   <div className="space-y-2 mb-4">
-                    {q.options.map((option, optIndex) => {
-                      const isSelected = selectedAnswers[originalIndex] === option;
-                      const isCorrect = option === q.correctAnswer;
-                      
-                      let optionClasses = "p-3 rounded-lg text-sm";
-                      if (isCorrect) {
-                        optionClasses += " bg-green-50 text-green-800 border border-green-200";
-                      } else if (isSelected) {
-                        optionClasses += " bg-red-50 text-red-800 border border-red-200";
-                      } else {
-                        optionClasses += " bg-gray-50 text-gray-700 border border-gray-200";
-                      }
-
-                      return (
-                        <div key={optIndex} className={optionClasses}>
-                          {option}
-                        </div>
-                      );
-                    })}
+                    <div className="p-3 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200">
+                      Your Answer: {userAnswer}
+                    </div>
+                    <div className="p-3 rounded-lg text-sm bg-green-50 text-green-800 border border-green-200">
+                      Correct Answer: {correctAnswer}
+                    </div>
                   </div>
 
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-blue-800 mb-2">Explanation:</h4>
-                    <p className="text-sm text-blue-700">{explanations[originalIndex]}</p>
+                  <div className="bg-blue-50 p-6 rounded-lg">
+                    <h4 className="text-base font-semibold text-blue-800 mb-3">Explanation:</h4>
+                    <p className="text-base text-blue-700 leading-relaxed text-left whitespace-pre-line">{explanations[originalIndex]}</p>
                   </div>
                 </div>
               );
