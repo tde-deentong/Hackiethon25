@@ -5,7 +5,7 @@ import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 
-GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
+GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/legacy/build/pdf.worker.min.mjs', import.meta.url).toString();
 
 const PdfQuestionWidget = () => {
   const [file, setFile] = useState(null);
