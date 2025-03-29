@@ -543,6 +543,29 @@ const PdfQuestionWidget = () => {
                       >
                         Try Again
                       </button>
+                      <label className="px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105 cursor-pointer">
+                        Upload New PDF
+                        <input
+                          type="file"
+                          accept=".pdf"
+                          onChange={(e) => {
+                            const selectedFile = e.target.files[0];
+                            if (selectedFile && selectedFile.type === 'application/pdf') {
+                              setFile(selectedFile);
+                              setQuestions([]);
+                              setSelectedAnswers({});
+                              setScore(0);
+                              setError(null);
+                              setExplanations({});
+                              setShowExplanation(false);
+                            } else {
+                              setError('Please select a valid PDF file');
+                              setFile(null);
+                            }
+                          }}
+                          className="hidden"
+                        />
+                      </label>
                       <button
                         onClick={clearAll}
                         className="px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-red-600 to-pink-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105"
