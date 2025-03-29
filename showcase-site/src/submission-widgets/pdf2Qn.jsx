@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GlobalWorkerOptions } from 'pdfjs-dist/build/pdf';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
@@ -17,6 +17,8 @@ const PdfQuestionWidget = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
   const [explanations, setExplanations] = useState({});
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const carouselRef = useRef(null);
 
   const carouselResponsive = {
     desktop: {
@@ -118,6 +120,15 @@ const PdfQuestionWidget = () => {
         [questionIndex]: explanation
       }));
     }
+
+    setTimeout(() => {
+      if (questionIndex < questions.length - 1) {
+        setCurrentSlide(questionIndex + 1);
+        if (carouselRef.current) {
+          carouselRef.current.goToSlide(questionIndex + 1);
+        }
+      }
+    }, 500);
   };
 
   const resetQuiz = () => {
@@ -341,17 +352,34 @@ const PdfQuestionWidget = () => {
                 </div>
               </div>
               <Carousel
+                ref={carouselRef}
                 responsive={carouselResponsive}
                 infinite={false}
                 containerClass="pb-1"
                 itemClass="px-1"
                 customButtonGroup={<div className="flex justify-center space-x-2 mt-4">
-                  <button className="p-2 rounded-full bg-white hover:bg-gray-100 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105">
+                  <button 
+                    className="p-2 rounded-full bg-white hover:bg-gray-100 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
+                    onClick={() => {
+                      if (currentSlide > 0) {
+                        setCurrentSlide(currentSlide - 1);
+                        carouselRef.current.goToSlide(currentSlide - 1);
+                      }
+                    }}
+                  >
                     <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
-                  <button className="p-2 rounded-full bg-white hover:bg-gray-100 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105">
+                  <button 
+                    className="p-2 rounded-full bg-white hover:bg-gray-100 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
+                    onClick={() => {
+                      if (currentSlide < questions.length - 1) {
+                        setCurrentSlide(currentSlide + 1);
+                        carouselRef.current.goToSlide(currentSlide + 1);
+                      }
+                    }}
+                  >
                     <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
@@ -360,6 +388,9 @@ const PdfQuestionWidget = () => {
                 renderDotsOutside={true}
                 customDot={<div className="w-2 h-2 mx-0.5 rounded-full bg-blue-200 hover:bg-blue-400 transition-all duration-300 hover:scale-125" />}
                 dotListClass="flex justify-center mt-4"
+                afterChange={(previousSlide, currentSlide) => {
+                  setCurrentSlide(currentSlide);
+                }}
               >
                 {questions.map((q, index) => (
                   <div key={index} className="p-3 bg-white rounded-lg shadow-md text-center transform transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
